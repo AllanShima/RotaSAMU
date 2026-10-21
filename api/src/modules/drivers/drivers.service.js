@@ -15,10 +15,17 @@ export const show = (id) =>
       return driver;
     });
 
-export const create = async (data) => {
+export const create = async ({ vehicle, ...data }) => {
   const password = await bcrypt.hash(data.password, SALT_ROUNDS);
+
   const driver = await prisma.user.create({
-    data: { ...data, password, role: UserRole.DRIVER },
+    data: {
+      ...data,
+      password,
+      role: UserRole.DRIVER,
+      vehicle: { create: vehicle },
+    },
+    include: { vehicle: true },
   });
   const { password: _, ...rest } = driver;
   return rest;
