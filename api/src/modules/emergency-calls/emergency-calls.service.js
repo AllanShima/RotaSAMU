@@ -8,13 +8,16 @@ import {
   notifyCallConcluded,
 } from "#modules/notifications/notifications.service.js";
 
-export const index = () => prisma.emergencyCall.findMany();
+export const index = () =>
+  prisma.emergencyCall.findMany({ include: withVehicleStatus });
 
 export const show = (id) =>
-  prisma.emergencyCall.findUnique({ where: { id } }).then((emergencyCall) => {
-    if (!emergencyCall) throw new NotFoundError("Emergency call not found");
-    return emergencyCall;
-  });
+  prisma.emergencyCall
+    .findUnique({ where: { id }, include: withVehicleStatus })
+    .then((emergencyCall) => {
+      if (!emergencyCall) throw new NotFoundError("Emergency call not found");
+      return emergencyCall;
+    });
 
 export const getLocation = (id) =>
   prisma.vehicleEmergencyCall
@@ -79,4 +82,10 @@ export const indexNotifications = async (emergencyCallId) => {
     where: { emergencyCallId },
     orderBy: { notifiedAt: "desc" },
   });
+};
+
+// Private
+
+const withVehicleStatus = {
+  vehicles: { select: { vehicleId: true, status: true } },
 };

@@ -72,7 +72,18 @@ export const startSimulation = async ({
 
   const emergencyCallId = await findOpenEmergencyCallId(vehicleId);
   if (emergencyCallId) {
-    await notifyVehicleEnRoute(emergencyCallId, vehicle.plate);
+    await prisma.$transaction(async (tx) => {
+      await tx.vehicleEmergencyCall.updateMany({
+        where: {
+          vehicleId,
+          emergencyCallId,
+          status: EmergencyCallStatus.NOT_STARTED,
+        },
+        data: { status: EmergencyCallStatus.IN_PROGRESS },
+      });
+
+      await notifyVehicleEnRoute(emergencyCallId, vehicle.plate, tx);
+    });
   }
 
   const cumulativeDistances = buildCumulativeDistances(route.coordinates);
