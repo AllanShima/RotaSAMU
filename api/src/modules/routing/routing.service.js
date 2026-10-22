@@ -1,3 +1,8 @@
+import { EmergencyCallStatus } from "@prisma/client";
+import {
+  notifyVehicleEnRoute,
+  notifyVehicleArrived,
+} from "#modules/notifications/notifications.service.js";
 import { prisma } from "#db/prisma.js";
 import {
   DEFAULT_SPEED_MULTIPLIER,
@@ -65,6 +70,22 @@ export const startSimulation = async ({
     destLng,
   });
 
+  const emergencyCallId = await findOpenEmergencyCallId(vehicleId);
+  if (emergencyCallId) {
+    await prisma.$transaction(async (tx) => {
+      await tx.vehicleEmergencyCall.updateMany({
+        where: {
+          vehicleId,
+          emergencyCallId,
+          status: EmergencyCallStatus.NOT_STARTED,
+        },
+        data: { status: EmergencyCallStatus.IN_PROGRESS },
+      });
+
+      await notifyVehicleEnRoute(emergencyCallId, vehicle.plate, tx);
+    });
+  }
+
   const cumulativeDistances = buildCumulativeDistances(route.coordinates);
   const totalDistance = cumulativeDistances[cumulativeDistances.length - 1];
 
@@ -92,6 +113,9 @@ export const startSimulation = async ({
 
       if (fraction >= 1) {
         stopSimulation(vehicleId);
+        if (emergencyCallId) {
+          await notifyVehicleArrived(emergencyCallId, vehicle.plate);
+        }
         onArrive?.();
       }
     } catch (error) {
@@ -126,3 +150,13 @@ export const isSimulating = (vehicleId) => activeSimulations.has(vehicleId);
 // Private
 
 const activeSimulations = new Map();
+
+// The most recent call assigned to the vehicle that is not finished yet.
+// Simulations started without an open call simply don't generate notifications.
+const findOpenEmergencyCallId = (vehicleId) =>
+  prisma.vehicleEmergencyCall
+    .findFirst({
+      where: { vehicleId, status: { not: EmergencyCallStatus.FINISHED } },
+      orderBy: { emergencyCall: { createdAt: "desc" } },
+    })
+    .then((record) => record?.emergencyCallId ?? null);

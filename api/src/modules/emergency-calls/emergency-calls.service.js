@@ -2,13 +2,22 @@ import { EmergencyCallStatus } from "@prisma/client";
 import { prisma } from "#db/prisma.js";
 import { NotFoundError } from "#utils/errors.js";
 
-export const index = () => prisma.emergencyCall.findMany();
+import {
+  notifyCallRegistered,
+  notifyVehicleAssigned,
+  notifyCallConcluded,
+} from "#modules/notifications/notifications.service.js";
+
+export const index = () =>
+  prisma.emergencyCall.findMany({ include: withVehicleStatus });
 
 export const show = (id) =>
-  prisma.emergencyCall.findUnique({ where: { id } }).then((emergencyCall) => {
-    if (!emergencyCall) throw new NotFoundError("Emergency call not found");
-    return emergencyCall;
-  });
+  prisma.emergencyCall
+    .findUnique({ where: { id }, include: withVehicleStatus })
+    .then((emergencyCall) => {
+      if (!emergencyCall) throw new NotFoundError("Emergency call not found");
+      return emergencyCall;
+    });
 
 export const getLocation = (id) =>
   prisma.vehicleEmergencyCall
@@ -24,7 +33,23 @@ export const getLocation = (id) =>
       };
     });
 
-export const create = (data) => prisma.emergencyCall.create({ data });
+export const create = async ({ driverId, ...data }) => {
+  const vehicle = await prisma.vehicle.findUnique({ where: { driverId } });
+  if (!vehicle) throw new NotFoundError("Vehicle not found for this driver");
+
+  return prisma.$transaction(async (tx) => {
+    const emergencyCall = await tx.emergencyCall.create({ data });
+
+    await tx.vehicleEmergencyCall.create({
+      data: { vehicleId: vehicle.id, emergencyCallId: emergencyCall.id },
+    });
+
+    await notifyCallRegistered(emergencyCall.id, tx);
+    await notifyVehicleAssigned(emergencyCall.id, vehicle.plate, tx);
+
+    return emergencyCall;
+  });
+};
 
 export const conclude = async (id) => {
   const emergencyCall = await prisma.emergencyCall.findUnique({
@@ -32,9 +57,18 @@ export const conclude = async (id) => {
   });
   if (!emergencyCall) throw new NotFoundError("Emergency call not found");
 
-  return prisma.vehicleEmergencyCall.updateMany({
-    where: { emergencyCallId: id },
-    data: { status: EmergencyCallStatus.FINISHED },
+  return prisma.$transaction(async (tx) => {
+    const result = await tx.vehicleEmergencyCall.updateMany({
+      where: {
+        emergencyCallId: id,
+        status: { not: EmergencyCallStatus.FINISHED },
+      },
+      data: { status: EmergencyCallStatus.FINISHED },
+    });
+
+    if (result.count > 0) await notifyCallConcluded(id, tx);
+
+    return result;
   });
 };
 
@@ -48,4 +82,10 @@ export const indexNotifications = async (emergencyCallId) => {
     where: { emergencyCallId },
     orderBy: { notifiedAt: "desc" },
   });
+};
+
+// Private
+
+const withVehicleStatus = {
+  vehicles: { select: { vehicleId: true, status: true } },
 };

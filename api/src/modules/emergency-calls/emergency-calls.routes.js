@@ -1,3 +1,4 @@
+import { z } from "zod/v4";
 import { EmergencyCallSchema } from "#prisma/generated/zod/index.ts";
 import { uuidIdSchema } from "#utils/schemas.js";
 import {
@@ -56,6 +57,8 @@ export default async function emergencyCallsRoutes(app) {
 const createBodySchema = EmergencyCallSchema.omit({
   id: true,
   createdAt: true,
+}).extend({
+  driverId: z.string().uuid(),
 });
 
 const getLocationQuerySchema = uuidIdSchema;
