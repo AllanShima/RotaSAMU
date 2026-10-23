@@ -14,12 +14,14 @@ import driversRoutes from "#modules/drivers/drivers.routes.js";
 import emergencyCallsRoutes from "#modules/emergency-calls/emergency-calls.routes.js";
 import conversationsRoutes from "#modules/conversations/conversations.routes.js";
 import routingRoutes from "#modules/routing/routing.routes.js";
+import { setupRealtime } from "#modules/routing/realtime.js";
 
 export async function buildApp() {
   const app = Fastify({ logger: true });
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
+  setupRealtime(app);
 
   await app.register(fastifySwagger, {
     openapi: {
