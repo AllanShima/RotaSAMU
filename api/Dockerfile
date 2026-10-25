@@ -27,6 +27,6 @@ WORKDIR /usr/src/app
 ENV NODE_ENV=production
 COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY . .
-EXPOSE 3000
+EXPOSE 3001
 USER node
 CMD ["node", "src/server.js"]
