@@ -13,6 +13,8 @@ import {
   indexConversations,
 } from "./drivers.service.js";
 
+import { VehicleSchema } from "#prisma/generated/zod/index.ts";
+
 export default async function driversRoutes(app) {
   app.get("/", { schema: { tags: ["Motoristas"] } }, () => index());
 
@@ -24,7 +26,7 @@ export default async function driversRoutes(app) {
 
   app.post(
     "/",
-    { schema: { tags: ["Motoristas"], body: createUserBodySchema } },
+    { schema: { tags: ["Motoristas"], body: createDriverBodySchema } },
     (request, reply) => {
       reply.code(201);
       return create(request.body);
@@ -52,3 +54,9 @@ export default async function driversRoutes(app) {
     (request) => indexConversations(request.params.id),
   );
 }
+
+// Private
+
+const createDriverBodySchema = createUserBodySchema.extend({
+  vehicle: VehicleSchema.pick({ plate: true, latitude: true, longitude: true }),
+});

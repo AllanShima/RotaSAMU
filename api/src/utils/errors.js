@@ -16,3 +16,15 @@ export class UnauthorizedError extends AppError {
     super(message, 401);
   }
 }
+
+export class UnprocessableEntityError extends AppError {
+  constructor(message = "Unprocessable entity") {
+    super(message, 422);
+  }
+}
+
+export class BadGatewayError extends AppError {
+  constructor(message = "Bad gateway") {
+    super(message, 502);
+  }
+}
