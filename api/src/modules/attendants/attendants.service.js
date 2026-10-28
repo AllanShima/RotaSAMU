@@ -5,6 +5,7 @@ import { prisma } from "#db/prisma.js";
 
 import { NotFoundError, UnauthorizedError } from "#utils/errors.js";
 import { SALT_ROUNDS } from "#config/constants.js";
+import { setStatus, updateUser } from "#modules/users/users.service.js";
 
 export const show = (id) =>
   prisma.user
@@ -35,20 +36,26 @@ export const login = async (data) => {
     throw new UnauthorizedError();
   }
 
-  const updatedAttendant = await prisma.user.update({
-    where: { id: attendant.id },
-    data: { status: UserStatus.ONLINE },
+  return setStatus({
+    id: attendant.id,
+    role: UserRole.ATTENDANT,
+    status: UserStatus.ONLINE,
   });
-
-  const { password: _, ...rest } = updatedAttendant;
-  return rest;
 };
 
 export const logout = (id) =>
-  prisma.user.update({ where: { id }, data: { status: UserStatus.OFFLINE } });
+  setStatus({ id, role: UserRole.ATTENDANT, status: UserStatus.OFFLINE });
+
+export const update = (id, data) =>
+  updateUser({ id, role: UserRole.ATTENDANT, data });
+
+export const updateStatus = (id, status) =>
+  setStatus({ id, role: UserRole.ATTENDANT, status });
 
 export const indexConversations = (attendantId) =>
   prisma.conversation.findMany({
     where: { attendantId },
-    include: { driver: { select: { id: true, email: true, phone: true } } },
+    include: {
+      driver: { select: { id: true, name: true, email: true, phone: true } },
+    },
   });

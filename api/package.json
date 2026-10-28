@@ -11,15 +11,18 @@
   },
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
-    "@prisma/client": "^7.10.0",
     "nodemon": "^3.1.0",
     "prisma": "^7.10.0",
+    "vitest": "^5.0.5",
     "zod-prisma-types": "^3.3.11"
   },
   "dependencies": {
+    "@prisma/client": "^7.10.0",
     "@fastify/swagger": "^9.8.1",
     "@fastify/swagger-ui": "^6.1.1",
     "@fastify/type-provider-zod": "^1.0.0",
