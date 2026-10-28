@@ -1,9 +1,14 @@
 import bcrypt from "bcrypt";
 import { UserRole, UserStatus } from "@prisma/client";
 import { prisma } from "#db/prisma.js";
-import { NotFoundError, UnauthorizedError } from "#utils/errors.js";
+import {
+  NotFoundError,
+  UnauthorizedError,
+  UnprocessableEntityError,
+} from "#utils/errors.js";
 import { SALT_ROUNDS } from "#config/constants.js";
 import { setStatus, updateUser } from "#modules/users/users.service.js";
+import { isSimulating } from "#modules/routing/routing.service.js";
 
 export const index = () =>
   prisma.user.findMany({ where: { role: UserRole.DRIVER } });
@@ -41,10 +46,40 @@ export const login = async (data) => {
     throw new UnauthorizedError();
   }
 
-  return setStatus({
+  const { latitude, longitude } = data;
+  const hasLocation = latitude !== undefined && longitude !== undefined;
+
+  return updateUser({
     id: driver.id,
     role: UserRole.DRIVER,
-    status: UserStatus.ONLINE,
+    data: {
+      status: UserStatus.ONLINE,
+      ...(hasLocation && { vehicle: { update: { latitude, longitude } } }),
+    },
+    include: { vehicle: true },
+  });
+};
+
+export const updateLocation = async (id, { latitude, longitude }) => {
+  const driver = await prisma.user.findFirst({
+    where: { id, role: UserRole.DRIVER },
+    include: { vehicle: true },
+  });
+  if (!driver) throw new NotFoundError("Driver not found");
+  if (driver.status !== UserStatus.ONLINE) {
+    throw new UnprocessableEntityError("Driver is offline");
+  }
+  if (!driver.vehicle) throw new NotFoundError("Vehicle not found");
+
+  if (isSimulating(driver.vehicle.id)) {
+    throw new UnprocessableEntityError(
+      "Vehicle is being simulated; stop the simulation to change its location",
+    );
+  }
+
+  return prisma.vehicle.update({
+    where: { id: driver.vehicle.id },
+    data: { latitude, longitude },
   });
 };
 

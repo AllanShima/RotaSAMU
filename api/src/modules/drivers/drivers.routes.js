@@ -1,6 +1,7 @@
 import {
   uuidIdSchema,
-  credentialsSchema,
+  driverLoginBodySchema,
+  locationSchema,
   createUserBodySchema,
 } from "#utils/schemas.js";
 
@@ -8,6 +9,7 @@ import {
   index,
   show,
   create,
+  updateLocation,
   login,
   logout,
   indexConversations,
@@ -35,8 +37,20 @@ export default async function driversRoutes(app) {
 
   app.post(
     "/login",
-    { schema: { tags: ["Motoristas"], body: credentialsSchema } },
+    { schema: { tags: ["Motoristas"], body: driverLoginBodySchema } },
     (request) => login(request.body),
+  );
+
+  app.patch(
+    "/:id/location",
+    {
+      schema: {
+        tags: ["Motoristas"],
+        params: uuidIdSchema,
+        body: locationSchema,
+      },
+    },
+    (request) => updateLocation(request.params.id, request.body),
   );
 
   app.post(
