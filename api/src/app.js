@@ -16,8 +16,8 @@ import conversationsRoutes from "#modules/conversations/conversations.routes.js"
 import routingRoutes from "#modules/routing/routing.routes.js";
 import { setupRealtime } from "#modules/routing/realtime.js";
 
-export async function buildApp() {
-  const app = Fastify({ logger: true });
+export async function buildApp({ logger = true } = {}) {
+  const app = Fastify({ logger });
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
