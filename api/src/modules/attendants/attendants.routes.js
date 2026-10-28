@@ -2,11 +2,15 @@ import {
   uuidIdSchema,
   credentialsSchema,
   createUserBodySchema,
+  updateUserBodySchema,
+  updateStatusBodySchema,
 } from "#utils/schemas.js";
 
 import {
   show,
   create,
+  update,
+  updateStatus,
   login,
   logout,
   indexConversations,
@@ -26,6 +30,30 @@ export default async function attendantsRoutes(app) {
       reply.code(201);
       return create(request.body);
     },
+  );
+
+  app.patch(
+    "/:id",
+    {
+      schema: {
+        tags: ["Atendentes"],
+        params: uuidIdSchema,
+        body: updateUserBodySchema,
+      },
+    },
+    (request) => update(request.params.id, request.body),
+  );
+
+  app.patch(
+    "/:id/status",
+    {
+      schema: {
+        tags: ["Atendentes"],
+        params: uuidIdSchema,
+        body: updateStatusBodySchema,
+      },
+    },
+    (request) => updateStatus(request.params.id, request.body.status),
   );
 
   app.post(

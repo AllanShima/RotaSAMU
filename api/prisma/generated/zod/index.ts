@@ -18,6 +18,7 @@ export const TransactionIsolationLevelSchema = z.enum([
 
 export const UserScalarFieldEnumSchema = z.enum([
   "id",
+  "name",
   "email",
   "password",
   "role",
@@ -112,6 +113,7 @@ export const UserSchema = z.object({
   role: UserRoleSchema,
   status: UserStatusSchema,
   id: z.uuid(),
+  name: z.string(),
   email: z.string(),
   password: z.string(),
   phone: z.string(),
@@ -262,6 +264,7 @@ export const UserCountOutputTypeSelectSchema: z.ZodType<Prisma.UserCountOutputTy
 export const UserSelectSchema: z.ZodType<Prisma.UserSelect> = z
   .object({
     id: z.boolean().optional(),
+    name: z.boolean().optional(),
     email: z.boolean().optional(),
     password: z.boolean().optional(),
     role: z.boolean().optional(),
@@ -619,6 +622,7 @@ export const UserWhereInputSchema: z.ZodType<Prisma.UserWhereInput> =
       ])
       .optional(),
     id: z.union([z.lazy(() => StringFilterSchema), z.string()]).optional(),
+    name: z.union([z.lazy(() => StringFilterSchema), z.string()]).optional(),
     email: z.union([z.lazy(() => StringFilterSchema), z.string()]).optional(),
     password: z
       .union([z.lazy(() => StringFilterSchema), z.string()])
@@ -661,6 +665,7 @@ export const UserWhereInputSchema: z.ZodType<Prisma.UserWhereInput> =
 export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWithRelationInput> =
   z.strictObject({
     id: z.lazy(() => SortOrderSchema).optional(),
+    name: z.lazy(() => SortOrderSchema).optional(),
     email: z.lazy(() => SortOrderSchema).optional(),
     password: z.lazy(() => SortOrderSchema).optional(),
     role: z.lazy(() => SortOrderSchema).optional(),
@@ -716,6 +721,9 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
             z.lazy(() => UserWhereInputSchema).array(),
           ])
           .optional(),
+        name: z
+          .union([z.lazy(() => StringFilterSchema), z.string()])
+          .optional(),
         password: z
           .union([z.lazy(() => StringFilterSchema), z.string()])
           .optional(),
@@ -760,6 +768,7 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
 export const UserOrderByWithAggregationInputSchema: z.ZodType<Prisma.UserOrderByWithAggregationInput> =
   z.strictObject({
     id: z.lazy(() => SortOrderSchema).optional(),
+    name: z.lazy(() => SortOrderSchema).optional(),
     email: z.lazy(() => SortOrderSchema).optional(),
     password: z.lazy(() => SortOrderSchema).optional(),
     role: z.lazy(() => SortOrderSchema).optional(),
@@ -790,6 +799,9 @@ export const UserScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.UserScal
       ])
       .optional(),
     id: z
+      .union([z.lazy(() => StringWithAggregatesFilterSchema), z.string()])
+      .optional(),
+    name: z
       .union([z.lazy(() => StringWithAggregatesFilterSchema), z.string()])
       .optional(),
     email: z
@@ -1865,6 +1877,7 @@ export const NotificationScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.
 export const UserCreateInputSchema: z.ZodType<Prisma.UserCreateInput> =
   z.strictObject({
     id: z.uuid().optional(),
+    name: z.string(),
     email: z.string(),
     password: z.string(),
     role: z.lazy(() => UserRoleSchema),
@@ -1891,6 +1904,7 @@ export const UserCreateInputSchema: z.ZodType<Prisma.UserCreateInput> =
 export const UserUncheckedCreateInputSchema: z.ZodType<Prisma.UserUncheckedCreateInput> =
   z.strictObject({
     id: z.uuid().optional(),
+    name: z.string(),
     email: z.string(),
     password: z.string(),
     role: z.lazy(() => UserRoleSchema),
@@ -1922,6 +1936,9 @@ export const UserUpdateInputSchema: z.ZodType<Prisma.UserUpdateInput> =
   z.strictObject({
     id: z
       .union([z.uuid(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
+      .optional(),
+    name: z
+      .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
     email: z
       .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
@@ -1971,6 +1988,9 @@ export const UserUncheckedUpdateInputSchema: z.ZodType<Prisma.UserUncheckedUpdat
   z.strictObject({
     id: z
       .union([z.uuid(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
+      .optional(),
+    name: z
+      .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
     email: z
       .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
@@ -2023,6 +2043,7 @@ export const UserUncheckedUpdateInputSchema: z.ZodType<Prisma.UserUncheckedUpdat
 export const UserCreateManyInputSchema: z.ZodType<Prisma.UserCreateManyInput> =
   z.strictObject({
     id: z.uuid().optional(),
+    name: z.string(),
     email: z.string(),
     password: z.string(),
     role: z.lazy(() => UserRoleSchema),
@@ -2035,6 +2056,9 @@ export const UserUpdateManyMutationInputSchema: z.ZodType<Prisma.UserUpdateManyM
   z.strictObject({
     id: z
       .union([z.uuid(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
+      .optional(),
+    name: z
+      .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
     email: z
       .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
@@ -2069,6 +2093,9 @@ export const UserUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserUncheckedU
   z.strictObject({
     id: z
       .union([z.uuid(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
+      .optional(),
+    name: z
+      .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
     email: z
       .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
@@ -3051,6 +3078,7 @@ export const MessageOrderByRelationAggregateInputSchema: z.ZodType<Prisma.Messag
 export const UserCountOrderByAggregateInputSchema: z.ZodType<Prisma.UserCountOrderByAggregateInput> =
   z.strictObject({
     id: z.lazy(() => SortOrderSchema).optional(),
+    name: z.lazy(() => SortOrderSchema).optional(),
     email: z.lazy(() => SortOrderSchema).optional(),
     password: z.lazy(() => SortOrderSchema).optional(),
     role: z.lazy(() => SortOrderSchema).optional(),
@@ -3062,6 +3090,7 @@ export const UserCountOrderByAggregateInputSchema: z.ZodType<Prisma.UserCountOrd
 export const UserMaxOrderByAggregateInputSchema: z.ZodType<Prisma.UserMaxOrderByAggregateInput> =
   z.strictObject({
     id: z.lazy(() => SortOrderSchema).optional(),
+    name: z.lazy(() => SortOrderSchema).optional(),
     email: z.lazy(() => SortOrderSchema).optional(),
     password: z.lazy(() => SortOrderSchema).optional(),
     role: z.lazy(() => SortOrderSchema).optional(),
@@ -3073,6 +3102,7 @@ export const UserMaxOrderByAggregateInputSchema: z.ZodType<Prisma.UserMaxOrderBy
 export const UserMinOrderByAggregateInputSchema: z.ZodType<Prisma.UserMinOrderByAggregateInput> =
   z.strictObject({
     id: z.lazy(() => SortOrderSchema).optional(),
+    name: z.lazy(() => SortOrderSchema).optional(),
     email: z.lazy(() => SortOrderSchema).optional(),
     password: z.lazy(() => SortOrderSchema).optional(),
     role: z.lazy(() => SortOrderSchema).optional(),
@@ -7033,6 +7063,7 @@ export const MessageScalarWhereInputSchema: z.ZodType<Prisma.MessageScalarWhereI
 export const UserCreateWithoutVehicleInputSchema: z.ZodType<Prisma.UserCreateWithoutVehicleInput> =
   z.strictObject({
     id: z.uuid().optional(),
+    name: z.string(),
     email: z.string(),
     password: z.string(),
     role: z.lazy(() => UserRoleSchema),
@@ -7056,6 +7087,7 @@ export const UserCreateWithoutVehicleInputSchema: z.ZodType<Prisma.UserCreateWit
 export const UserUncheckedCreateWithoutVehicleInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutVehicleInput> =
   z.strictObject({
     id: z.uuid().optional(),
+    name: z.string(),
     email: z.string(),
     password: z.string(),
     role: z.lazy(() => UserRoleSchema),
@@ -7152,6 +7184,9 @@ export const UserUpdateWithoutVehicleInputSchema: z.ZodType<Prisma.UserUpdateWit
     id: z
       .union([z.uuid(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
+    name: z
+      .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
+      .optional(),
     email: z
       .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
@@ -7197,6 +7232,9 @@ export const UserUncheckedUpdateWithoutVehicleInputSchema: z.ZodType<Prisma.User
   z.strictObject({
     id: z
       .union([z.uuid(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
+      .optional(),
+    name: z
+      .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
     email: z
       .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
@@ -7318,6 +7356,7 @@ export const VehicleEmergencyCallScalarWhereInputSchema: z.ZodType<Prisma.Vehicl
 export const UserCreateWithoutRegisteredCallsInputSchema: z.ZodType<Prisma.UserCreateWithoutRegisteredCallsInput> =
   z.strictObject({
     id: z.uuid().optional(),
+    name: z.string(),
     email: z.string(),
     password: z.string(),
     role: z.lazy(() => UserRoleSchema),
@@ -7341,6 +7380,7 @@ export const UserCreateWithoutRegisteredCallsInputSchema: z.ZodType<Prisma.UserC
 export const UserUncheckedCreateWithoutRegisteredCallsInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutRegisteredCallsInput> =
   z.strictObject({
     id: z.uuid().optional(),
+    name: z.string(),
     email: z.string(),
     password: z.string(),
     role: z.lazy(() => UserRoleSchema),
@@ -7470,6 +7510,9 @@ export const UserUpdateWithoutRegisteredCallsInputSchema: z.ZodType<Prisma.UserU
     id: z
       .union([z.uuid(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
+    name: z
+      .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
+      .optional(),
     email: z
       .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
@@ -7515,6 +7558,9 @@ export const UserUncheckedUpdateWithoutRegisteredCallsInputSchema: z.ZodType<Pri
   z.strictObject({
     id: z
       .union([z.uuid(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
+      .optional(),
+    name: z
+      .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
     email: z
       .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
@@ -7944,6 +7990,7 @@ export const EmergencyCallUncheckedUpdateWithoutVehiclesInputSchema: z.ZodType<P
 export const UserCreateWithoutConversationsAsAttendantInputSchema: z.ZodType<Prisma.UserCreateWithoutConversationsAsAttendantInput> =
   z.strictObject({
     id: z.uuid().optional(),
+    name: z.string(),
     email: z.string(),
     password: z.string(),
     role: z.lazy(() => UserRoleSchema),
@@ -7967,6 +8014,7 @@ export const UserCreateWithoutConversationsAsAttendantInputSchema: z.ZodType<Pri
 export const UserUncheckedCreateWithoutConversationsAsAttendantInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutConversationsAsAttendantInput> =
   z.strictObject({
     id: z.uuid().optional(),
+    name: z.string(),
     email: z.string(),
     password: z.string(),
     role: z.lazy(() => UserRoleSchema),
@@ -8003,6 +8051,7 @@ export const UserCreateOrConnectWithoutConversationsAsAttendantInputSchema: z.Zo
 export const UserCreateWithoutConversationsAsDriverInputSchema: z.ZodType<Prisma.UserCreateWithoutConversationsAsDriverInput> =
   z.strictObject({
     id: z.uuid().optional(),
+    name: z.string(),
     email: z.string(),
     password: z.string(),
     role: z.lazy(() => UserRoleSchema),
@@ -8026,6 +8075,7 @@ export const UserCreateWithoutConversationsAsDriverInputSchema: z.ZodType<Prisma
 export const UserUncheckedCreateWithoutConversationsAsDriverInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutConversationsAsDriverInput> =
   z.strictObject({
     id: z.uuid().optional(),
+    name: z.string(),
     email: z.string(),
     password: z.string(),
     role: z.lazy(() => UserRoleSchema),
@@ -8126,6 +8176,9 @@ export const UserUpdateWithoutConversationsAsAttendantInputSchema: z.ZodType<Pri
     id: z
       .union([z.uuid(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
+    name: z
+      .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
+      .optional(),
     email: z
       .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
@@ -8171,6 +8224,9 @@ export const UserUncheckedUpdateWithoutConversationsAsAttendantInputSchema: z.Zo
   z.strictObject({
     id: z
       .union([z.uuid(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
+      .optional(),
+    name: z
+      .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
     email: z
       .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
@@ -8242,6 +8298,9 @@ export const UserUpdateWithoutConversationsAsDriverInputSchema: z.ZodType<Prisma
     id: z
       .union([z.uuid(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
+    name: z
+      .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
+      .optional(),
     email: z
       .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
@@ -8287,6 +8346,9 @@ export const UserUncheckedUpdateWithoutConversationsAsDriverInputSchema: z.ZodTy
   z.strictObject({
     id: z
       .union([z.uuid(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
+      .optional(),
+    name: z
+      .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
     email: z
       .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
@@ -8367,6 +8429,7 @@ export const MessageUpdateManyWithWhereWithoutConversationInputSchema: z.ZodType
 export const UserCreateWithoutSentMessagesInputSchema: z.ZodType<Prisma.UserCreateWithoutSentMessagesInput> =
   z.strictObject({
     id: z.uuid().optional(),
+    name: z.string(),
     email: z.string(),
     password: z.string(),
     role: z.lazy(() => UserRoleSchema),
@@ -8390,6 +8453,7 @@ export const UserCreateWithoutSentMessagesInputSchema: z.ZodType<Prisma.UserCrea
 export const UserUncheckedCreateWithoutSentMessagesInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutSentMessagesInput> =
   z.strictObject({
     id: z.uuid().optional(),
+    name: z.string(),
     email: z.string(),
     password: z.string(),
     role: z.lazy(() => UserRoleSchema),
@@ -8477,6 +8541,9 @@ export const UserUpdateWithoutSentMessagesInputSchema: z.ZodType<Prisma.UserUpda
     id: z
       .union([z.uuid(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
+    name: z
+      .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
+      .optional(),
     email: z
       .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
@@ -8522,6 +8589,9 @@ export const UserUncheckedUpdateWithoutSentMessagesInputSchema: z.ZodType<Prisma
   z.strictObject({
     id: z
       .union([z.uuid(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
+      .optional(),
+    name: z
+      .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])
       .optional(),
     email: z
       .union([z.string(), z.lazy(() => StringFieldUpdateOperationsInputSchema)])

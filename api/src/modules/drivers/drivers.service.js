@@ -3,6 +3,7 @@ import { UserRole, UserStatus } from "@prisma/client";
 import { prisma } from "#db/prisma.js";
 import { NotFoundError, UnauthorizedError } from "#utils/errors.js";
 import { SALT_ROUNDS } from "#config/constants.js";
+import { setStatus, updateUser } from "#modules/users/users.service.js";
 
 export const index = () =>
   prisma.user.findMany({ where: { role: UserRole.DRIVER } });
@@ -40,20 +41,26 @@ export const login = async (data) => {
     throw new UnauthorizedError();
   }
 
-  const updatedDriver = await prisma.user.update({
-    where: { id: driver.id },
-    data: { status: UserStatus.ONLINE },
+  return setStatus({
+    id: driver.id,
+    role: UserRole.DRIVER,
+    status: UserStatus.ONLINE,
   });
-
-  const { password: _, ...rest } = updatedDriver;
-  return rest;
 };
 
 export const logout = (id) =>
-  prisma.user.update({ where: { id }, data: { status: UserStatus.OFFLINE } });
+  setStatus({ id, role: UserRole.DRIVER, status: UserStatus.OFFLINE });
+
+export const update = (id, data) =>
+  updateUser({ id, role: UserRole.DRIVER, data });
+
+export const updateStatus = (id, status) =>
+  setStatus({ id, role: UserRole.DRIVER, status });
 
 export const indexConversations = (driverId) =>
   prisma.conversation.findMany({
     where: { driverId },
-    include: { attendant: { select: { id: true, email: true, phone: true } } },
+    include: {
+      attendant: { select: { id: true, name: true, email: true, phone: true } },
+    },
   });
