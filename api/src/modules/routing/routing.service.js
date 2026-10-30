@@ -5,6 +5,11 @@ import {
 } from "#modules/notifications/notifications.service.js";
 import { prisma } from "#db/prisma.js";
 import {
+  clearRoute,
+  emitToVehicle,
+  publishRoute,
+} from "#modules/routing/realtime.js";
+import {
   DEFAULT_SPEED_MULTIPLIER,
   DEFAULT_TICK_MS,
   OSRM_BASE_URL,
@@ -92,6 +97,17 @@ export const startSimulation = async ({
   // Simulated duration = real duration divided by the speed multiplier.
   const simulatedDurationSeconds = route.durationSeconds / speedMultiplier;
 
+  // Rota completa, para o app desenhar a linha no mapa. Quem se inscrever
+  // depois recebe esta mesma rota no momento da inscrição.
+  publishRoute(vehicleId, {
+    vehicleId,
+    emergencyCallId,
+    coordinates: route.coordinates,
+    distanceMeters: route.distanceMeters,
+    durationSeconds: route.durationSeconds,
+    simulatedDurationSeconds,
+  });
+
   let elapsedSeconds = 0;
 
   const intervalId = setInterval(async () => {
@@ -111,8 +127,21 @@ export const startSimulation = async ({
         data: { latitude: position.lat, longitude: position.lng },
       });
 
+      emitToVehicle(vehicleId, "vehicle:position", {
+        vehicleId,
+        lat: position.lat,
+        lng: position.lng,
+        progress: fraction,
+      });
+
       if (fraction >= 1) {
         stopSimulation(vehicleId);
+        emitToVehicle(vehicleId, "vehicle:arrived", {
+          vehicleId,
+          emergencyCallId,
+          lat: position.lat,
+          lng: position.lng,
+        });
         if (emergencyCallId) {
           await notifyVehicleArrived(emergencyCallId, vehicle.plate);
         }
@@ -142,6 +171,7 @@ export const stopSimulation = (vehicleId) => {
   if (simulation) {
     clearInterval(simulation.intervalId);
     activeSimulations.delete(vehicleId);
+    clearRoute(vehicleId);
   }
 };
 

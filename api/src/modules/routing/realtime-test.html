@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RotaSAMU - teste de tempo real</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 16px;
+        max-width: 760px;
+      }
+      input {
+        width: 100%;
+        max-width: 360px;
+        padding: 6px;
+      }
+      button {
+        padding: 6px 10px;
+        margin: 4px 4px 4px 0;
+      }
+      #status {
+        font-weight: 600;
+      }
+      #status.on {
+        color: #1a7f37;
+      }
+      #status.off {
+        color: #b42318;
+      }
+      #log {
+        background: #f4f4f5;
+        padding: 10px;
+        min-height: 160px;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Teste de tempo real</h1>
+    <p>Conexão: <span id="status" class="off">desconectado</span></p>
+
+    <p>
+      <input id="vehicleId" placeholder="vehicleId (uuid)" />
+      <button id="one">Acompanhar este veículo</button>
+      <button id="all">Acompanhar todos</button>
+      <button id="clear">Limpar log</button>
+    </p>
+    <p>
+      Depois de se inscrever, dispare <code>POST /routing/simulate</code> pelo
+      Swagger (<a href="/docs">/docs</a>).
+    </p>
+
+    <pre id="log"></pre>
+
+    <!-- O próprio socket.io serve o cliente, sem CDN. -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      const statusEl = document.getElementById("status");
+      const logEl = document.getElementById("log");
+      const vehicleInput = document.getElementById("vehicleId");
+      const lines = [];
+
+      const write = (event, text) => {
+        lines.unshift(
+          new Date().toLocaleTimeString() + "  " + event + "  " + text,
+        );
+        lines.length = Math.min(lines.length, 200);
+        logEl.textContent = lines.join("\n");
+      };
+
+      socket.on("connect", () => {
+        statusEl.textContent = "conectado";
+        statusEl.className = "on";
+      });
+      socket.on("disconnect", () => {
+        statusEl.textContent = "desconectado";
+        statusEl.className = "off";
+      });
+
+      socket.on("vehicle:route", (d) =>
+        write(
+          "vehicle:route",
+          d.coordinates.length +
+            " pontos, " +
+            Math.round(d.distanceMeters) +
+            " m, " +
+            Math.round(d.durationSeconds) +
+            " s (real)",
+        ),
+      );
+      socket.on("vehicle:position", (d) =>
+        write(
+          "vehicle:position",
+          d.lat.toFixed(5) +
+            ", " +
+            d.lng.toFixed(5) +
+            " (" +
+            Math.round(d.progress * 100) +
+            "%)",
+        ),
+      );
+      socket.on("vehicle:arrived", (d) =>
+        write("vehicle:arrived", d.lat.toFixed(5) + ", " + d.lng.toFixed(5)),
+      );
+
+      document.getElementById("one").onclick = () => {
+        const id = vehicleInput.value.trim();
+        if (!id) return write("erro", "informe o vehicleId");
+        socket.emit("vehicle:subscribe", id);
+        write("inscrito", "veículo " + id);
+      };
+      document.getElementById("all").onclick = () => {
+        socket.emit("vehicles:subscribe");
+        write("inscrito", "todos os veículos");
+      };
+      document.getElementById("clear").onclick = () => {
+        lines.length = 0;
+        logEl.textContent = "";
+      };
+    </script>
+  </body>
+</html>
