@@ -6,7 +6,7 @@ import {
   validatorCompiler,
   jsonSchemaTransform,
 } from "@fastify/type-provider-zod";
-
+import cors from "@fastify/cors";
 import { AppError } from "#utils/errors.js";
 
 import attendantsRoutes from "#modules/attendants/attendants.routes.js";
@@ -18,6 +18,12 @@ import { setupRealtime } from "#modules/routing/realtime.js";
 
 export async function buildApp({ logger = true } = {}) {
   const app = Fastify({ logger });
+
+  // Registrar o CORS
+  await app.register(cors, {
+    origin: "http://localhost:3000",
+    credentials: true,
+  });
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);

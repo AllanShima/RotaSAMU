@@ -80,7 +80,7 @@ PGADMIN_EMAIL=admin@example.com
 PGADMIN_PASSWORD=troque-esta-senha
 
 # Opcionais (valores padrão abaixo)
-API_PORT=3000
+API_PORT=3001
 DB_PORT=5432
 PGADMIN_PORT=5050
 NODE_ENV=development
@@ -104,8 +104,8 @@ docker compose exec api npx prisma migrate deploy
 
 | Serviço | URL |
 | --- | --- |
-| API | http://localhost:3000 |
-| Documentação (Swagger UI) | http://localhost:3000/docs |
+| API | http://localhost:3001 |
+| Documentação (Swagger UI) | http://localhost:3001/docs |
 | pgAdmin | http://localhost:5050 |
 
 As portas mudam se você definiu `API_PORT` ou `PGADMIN_PORT` no `.env`.
