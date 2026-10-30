@@ -26,6 +26,7 @@ export const useTestApp = () => {
 export const createAttendant = (overrides = {}) =>
   prisma.user.create({
     data: {
+      name: `Atendente ${nextNumber()}`,
       email: `attendant${nextNumber()}@example.com`,
       password: "hashed-password",
       phone: "14999999999",
@@ -39,6 +40,7 @@ export const createDriver = ({ vehicle, ...overrides } = {}) => {
 
   return prisma.user.create({
     data: {
+      name: `Motorista ${number}`,
       email: `driver${number}@example.com`,
       password: "hashed-password",
       phone: "14999999999",
