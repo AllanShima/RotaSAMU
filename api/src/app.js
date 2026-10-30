@@ -1,4 +1,5 @@
 import Fastify from "fastify";
+import fastifyCors from "@fastify/cors";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUI from "@fastify/swagger-ui";
 import {
@@ -8,6 +9,7 @@ import {
 } from "@fastify/type-provider-zod";
 import cors from "@fastify/cors";
 import { AppError } from "#utils/errors.js";
+import { fromPrismaError } from "#utils/prisma-errors.js";
 
 import attendantsRoutes from "#modules/attendants/attendants.routes.js";
 import driversRoutes from "#modules/drivers/drivers.routes.js";
@@ -27,6 +29,14 @@ export async function buildApp({ logger = true } = {}) {
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
+
+  // PATCH precisa estar na lista: o padrão do plugin é só GET, HEAD e POST.
+  await app.register(fastifyCors, {
+    origin: CORS_ORIGIN,
+    credentials: true,
+    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  });
+
   setupRealtime(app);
 
   await app.register(fastifySwagger, {
@@ -74,8 +84,11 @@ export async function buildApp({ logger = true } = {}) {
   app.register(routingRoutes, { prefix: "/routing" });
 
   app.setErrorHandler((error, request, reply) => {
-    if (error instanceof AppError) {
-      return reply.code(error.statusCode).send({ message: error.message });
+    const appError = error instanceof AppError ? error : fromPrismaError(error);
+    if (appError) {
+      return reply
+        .code(appError.statusCode)
+        .send({ message: appError.message });
     }
 
     if (error.validation) {

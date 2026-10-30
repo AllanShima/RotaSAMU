@@ -17,6 +17,12 @@ export class UnauthorizedError extends AppError {
   }
 }
 
+export class ConflictError extends AppError {
+  constructor(message = "Conflict") {
+    super(message, 409);
+  }
+}
+
 export class UnprocessableEntityError extends AppError {
   constructor(message = "Unprocessable entity") {
     super(message, 422);

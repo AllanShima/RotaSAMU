@@ -3,6 +3,7 @@ import {
   driverLoginBodySchema,
   locationSchema,
   createUserBodySchema,
+  updateStatusBodySchema,
 } from "#utils/schemas.js";
 
 import {
@@ -10,6 +11,7 @@ import {
   show,
   create,
   updateLocation,
+  updateStatus,
   login,
   logout,
   indexConversations,
@@ -51,6 +53,18 @@ export default async function driversRoutes(app) {
       },
     },
     (request) => updateLocation(request.params.id, request.body),
+  );
+
+  app.patch(
+    "/:id/status",
+    {
+      schema: {
+        tags: ["Motoristas"],
+        params: uuidIdSchema,
+        body: updateStatusBodySchema,
+      },
+    },
+    (request) => updateStatus(request.params.id, request.body.status),
   );
 
   app.post(

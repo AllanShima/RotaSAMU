@@ -3,6 +3,10 @@ import { NotFoundError } from "#utils/errors.js";
 
 const withoutPassword = ({ password: _, ...rest }) => rest;
 
+// Campos que nunca devem sair da API. Use em toda consulta de usuário cujo
+// resultado vira resposta: prisma.user.findMany({ omit: OMIT_PASSWORD }).
+export const OMIT_PASSWORD = { password: true };
+
 // Lógica compartilhada entre atendentes e motoristas.
 
 export const updateUser = async ({ id, role, data, include }) => {

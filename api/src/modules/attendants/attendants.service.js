@@ -5,15 +5,23 @@ import { prisma } from "#db/prisma.js";
 
 import { NotFoundError, UnauthorizedError } from "#utils/errors.js";
 import { SALT_ROUNDS } from "#config/constants.js";
-import { setStatus, updateUser } from "#modules/users/users.service.js";
+import {
+  OMIT_PASSWORD,
+  setStatus,
+  updateUser,
+} from "#modules/users/users.service.js";
+
+export const index = () =>
+  prisma.user.findMany({
+    where: { role: UserRole.ATTENDANT },
+    omit: OMIT_PASSWORD,
+  });
 
 export const show = (id) =>
-  prisma.user
-    .findFirst({ where: { id, role: UserRole.ATTENDANT } })
-    .then((attendant) => {
-      if (!attendant) throw new NotFoundError("Attendant not found");
-      return attendant;
-    });
+  prisma.user.findFirst({
+    where: { id, role: UserRole.ATTENDANT },
+    omit: OMIT_PASSWORD,
+  });
 
 export const create = async (data) => {
   const password = await bcrypt.hash(data.password, SALT_ROUNDS);

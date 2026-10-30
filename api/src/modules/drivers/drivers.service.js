@@ -7,19 +7,25 @@ import {
   UnprocessableEntityError,
 } from "#utils/errors.js";
 import { SALT_ROUNDS } from "#config/constants.js";
-import { setStatus, updateUser } from "#modules/users/users.service.js";
+import {
+  OMIT_PASSWORD,
+  setStatus,
+  updateUser,
+} from "#modules/users/users.service.js";
 import { isSimulating } from "#modules/routing/routing.service.js";
 
 export const index = () =>
-  prisma.user.findMany({ where: { role: UserRole.DRIVER } });
+  prisma.user.findMany({
+    where: { role: UserRole.DRIVER },
+    omit: OMIT_PASSWORD,
+  });
 
 export const show = (id) =>
-  prisma.user
-    .findFirst({ where: { id, role: UserRole.DRIVER } })
-    .then((driver) => {
-      if (!driver) throw new NotFoundError("Driver not found");
-      return driver;
-    });
+  prisma.user.findFirst({
+    where: { id, role: UserRole.DRIVER },
+    include: { vehicle: true },
+    omit: OMIT_PASSWORD,
+  });
 
 export const create = async ({ vehicle, ...data }) => {
   const password = await bcrypt.hash(data.password, SALT_ROUNDS);
