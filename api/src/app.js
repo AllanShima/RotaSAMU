@@ -1,4 +1,5 @@
 import Fastify from "fastify";
+import fastifyCors from "@fastify/cors";
 import fastifySwagger from "@fastify/swagger";
 import fastifySwaggerUI from "@fastify/swagger-ui";
 import {
@@ -7,6 +8,7 @@ import {
   jsonSchemaTransform,
 } from "@fastify/type-provider-zod";
 
+import { CORS_ORIGIN } from "#config/constants.js";
 import { AppError } from "#utils/errors.js";
 import { fromPrismaError } from "#utils/prisma-errors.js";
 
@@ -22,6 +24,14 @@ export async function buildApp({ logger = true } = {}) {
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
+
+  // PATCH precisa estar na lista: o padrão do plugin é só GET, HEAD e POST.
+  await app.register(fastifyCors, {
+    origin: CORS_ORIGIN,
+    credentials: true,
+    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  });
+
   setupRealtime(app);
 
   await app.register(fastifySwagger, {

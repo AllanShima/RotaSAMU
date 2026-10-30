@@ -33,6 +33,8 @@ import { readFile } from "node:fs/promises";
 
 import { Server } from "socket.io";
 
+import { CORS_ORIGIN } from "#config/constants.js";
+
 const ALL_VEHICLES_ROOM = "vehicles:all";
 const vehicleRoom = (vehicleId) => `vehicle:${vehicleId}`;
 
@@ -45,9 +47,8 @@ const activeRoutes = new Map();
 
 export function setupRealtime(app) {
   io = new Server(app.server, {
-    // Libera qualquer origem — ok pra projeto de simulação. Em produção,
-    // trocar pelo endereço real do front end.
-    cors: { origin: "*" },
+    // Mesmas origens da API HTTP.
+    cors: { origin: CORS_ORIGIN, credentials: true },
   });
 
   io.on("connection", (socket) => {

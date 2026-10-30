@@ -13,16 +13,16 @@ API back-end do **RotaSAMU**, um sistema de apoio ao atendimento de chamados de 
 
 ## Tecnologias
 
-| Camada | Tecnologia |
-| --- | --- |
-| Runtime | Node.js 22 (ES Modules) |
-| Framework | [Fastify](https://fastify.dev/) 5 |
-| Validação | [Zod](https://zod.dev/) 4 + `@fastify/type-provider-zod` |
-| ORM | [Prisma](https://www.prisma.io/) 7 com `@prisma/adapter-pg` |
-| Banco de dados | PostgreSQL 16 |
-| Senhas | bcrypt |
-| Documentação | `@fastify/swagger` + `@fastify/swagger-ui` |
-| Infra local | Docker Compose (API, PostgreSQL e pgAdmin) |
+| Camada         | Tecnologia                                                  |
+| -------------- | ----------------------------------------------------------- |
+| Runtime        | Node.js 22 (ES Modules)                                     |
+| Framework      | [Fastify](https://fastify.dev/) 5                           |
+| Validação      | [Zod](https://zod.dev/) 4 + `@fastify/type-provider-zod`    |
+| ORM            | [Prisma](https://www.prisma.io/) 7 com `@prisma/adapter-pg` |
+| Banco de dados | PostgreSQL 16                                               |
+| Senhas         | bcrypt                                                      |
+| Documentação   | `@fastify/swagger` + `@fastify/swagger-ui`                  |
+| Infra local    | Docker Compose (API, PostgreSQL e pgAdmin)                  |
 
 ## Estrutura do projeto
 
@@ -80,7 +80,9 @@ PGADMIN_EMAIL=admin@example.com
 PGADMIN_PASSWORD=troque-esta-senha
 
 # Opcionais (valores padrão abaixo)
-API_PORT=3000
+API_PORT=3001
+# Origens do front end liberadas no CORS (separadas por vírgula)
+CORS_ORIGIN=http://localhost:3000
 DB_PORT=5432
 PGADMIN_PORT=5050
 NODE_ENV=development
@@ -102,11 +104,11 @@ docker compose exec api npx prisma migrate deploy
 
 ### 5. Acessar
 
-| Serviço | URL |
-| --- | --- |
-| API | http://localhost:3000 |
-| Documentação (Swagger UI) | http://localhost:3000/docs |
-| pgAdmin | http://localhost:5050 |
+| Serviço                   | URL                        |
+| ------------------------- | -------------------------- |
+| API                       | http://localhost:3001      |
+| Documentação (Swagger UI) | http://localhost:3001/docs |
+| pgAdmin                   | http://localhost:5050      |
 
 As portas mudam se você definiu `API_PORT` ou `PGADMIN_PORT` no `.env`.
 
@@ -116,53 +118,53 @@ A documentação completa, com os schemas de entrada, fica em `/docs`. Resumo:
 
 ### Atendentes (`/attendants`)
 
-| Método | Rota | Descrição |
-| --- | --- | --- |
-| `GET` | `/attendants/:id` | Busca um atendente |
-| `POST` | `/attendants` | Cadastra um atendente (`email`, `password`, `phone`) |
-| `POST` | `/attendants/login` | Login (`email`, `password`); marca o usuário como `ONLINE` |
-| `POST` | `/attendants/logout` | Logout (`id`); marca o usuário como `OFFLINE` |
-| `GET` | `/attendants/:id/conversations` | Lista as conversas do atendente |
+| Método | Rota                            | Descrição                                                  |
+| ------ | ------------------------------- | ---------------------------------------------------------- |
+| `GET`  | `/attendants/:id`               | Busca um atendente                                         |
+| `POST` | `/attendants`                   | Cadastra um atendente (`email`, `password`, `phone`)       |
+| `POST` | `/attendants/login`             | Login (`email`, `password`); marca o usuário como `ONLINE` |
+| `POST` | `/attendants/logout`            | Logout (`id`); marca o usuário como `OFFLINE`              |
+| `GET`  | `/attendants/:id/conversations` | Lista as conversas do atendente                            |
 
 ### Motoristas (`/drivers`)
 
-| Método | Rota | Descrição |
-| --- | --- | --- |
-| `GET` | `/drivers` | Lista os motoristas |
-| `GET` | `/drivers/:id` | Busca um motorista |
-| `POST` | `/drivers` | Cadastra um motorista (`email`, `password`, `phone`) |
-| `POST` | `/drivers/login` | Login; marca o usuário como `ONLINE` |
-| `POST` | `/drivers/logout` | Logout; marca o usuário como `OFFLINE` |
-| `GET` | `/drivers/:id/conversations` | Lista as conversas do motorista |
+| Método | Rota                         | Descrição                                            |
+| ------ | ---------------------------- | ---------------------------------------------------- |
+| `GET`  | `/drivers`                   | Lista os motoristas                                  |
+| `GET`  | `/drivers/:id`               | Busca um motorista                                   |
+| `POST` | `/drivers`                   | Cadastra um motorista (`email`, `password`, `phone`) |
+| `POST` | `/drivers/login`             | Login; marca o usuário como `ONLINE`                 |
+| `POST` | `/drivers/logout`            | Logout; marca o usuário como `OFFLINE`               |
+| `GET`  | `/drivers/:id/conversations` | Lista as conversas do motorista                      |
 
 ### Chamados de emergência (`/emergency-calls`)
 
-| Método | Rota | Descrição |
-| --- | --- | --- |
-| `GET` | `/emergency-calls` | Lista os chamados |
-| `GET` | `/emergency-calls/:id` | Busca um chamado |
-| `GET` | `/emergency-calls/get_location?id=` | Posição atual (`latitude`, `longitude`) do veículo vinculado ao chamado |
-| `POST` | `/emergency-calls` | Registra um chamado |
-| `PATCH` | `/emergency-calls/:id/conclude` | Marca o chamado como `FINISHED` |
-| `GET` | `/emergency-calls/:id/notifications` | Lista as notificações do chamado, da mais recente para a mais antiga |
+| Método  | Rota                                 | Descrição                                                               |
+| ------- | ------------------------------------ | ----------------------------------------------------------------------- |
+| `GET`   | `/emergency-calls`                   | Lista os chamados                                                       |
+| `GET`   | `/emergency-calls/:id`               | Busca um chamado                                                        |
+| `GET`   | `/emergency-calls/get_location?id=`  | Posição atual (`latitude`, `longitude`) do veículo vinculado ao chamado |
+| `POST`  | `/emergency-calls`                   | Registra um chamado                                                     |
+| `PATCH` | `/emergency-calls/:id/conclude`      | Marca o chamado como `FINISHED`                                         |
+| `GET`   | `/emergency-calls/:id/notifications` | Lista as notificações do chamado, da mais recente para a mais antiga    |
 
 Campos de `POST /emergency-calls`: `protocol`, `address`, `returnLocation`, `whatHappened`, `patientCondition`, `apparentAge` (inteiro ou `null`), `patientCount`, `injuryCondition`, `observations` (texto ou `null`) e `attendantId`.
 
 ### Conversas (`/conversations`)
 
-| Método | Rota | Descrição |
-| --- | --- | --- |
-| `GET` | `/conversations?attendantId=&driverId=` | Retorna a conversa entre os dois, com as mensagens em ordem cronológica (cria se não existir) |
-| `POST` | `/conversations/messages` | Envia uma mensagem (`attendantId`, `driverId`, `senderId`, `text`) |
+| Método | Rota                                    | Descrição                                                                                     |
+| ------ | --------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `GET`  | `/conversations?attendantId=&driverId=` | Retorna a conversa entre os dois, com as mensagens em ordem cronológica (cria se não existir) |
+| `POST` | `/conversations/messages`               | Envia uma mensagem (`attendantId`, `driverId`, `senderId`, `text`)                            |
 
 ### Rotas e simulação (`/routing`)
 
-| Método | Rota | Descrição |
-| --- | --- | --- |
-| `GET` | `/routing/preview?originLat=&originLng=&destLat=&destLng=` | Calcula a rota e retorna coordenadas, distância (m) e duração (s) |
-| `POST` | `/routing/simulate` | Inicia a simulação de um veículo até o destino (`vehicleId`, `destLat`, `destLng`, `speedMultiplier` e `tickMs` opcionais) |
-| `POST` | `/routing/simulate/:vehicleId/stop` | Interrompe a simulação |
-| `GET` | `/routing/simulate/:vehicleId/status` | Informa se há simulação ativa (`{ "running": true }`) |
+| Método | Rota                                                       | Descrição                                                                                                                  |
+| ------ | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/routing/preview?originLat=&originLng=&destLat=&destLng=` | Calcula a rota e retorna coordenadas, distância (m) e duração (s)                                                          |
+| `POST` | `/routing/simulate`                                        | Inicia a simulação de um veículo até o destino (`vehicleId`, `destLat`, `destLng`, `speedMultiplier` e `tickMs` opcionais) |
+| `POST` | `/routing/simulate/:vehicleId/stop`                        | Interrompe a simulação                                                                                                     |
+| `GET`  | `/routing/simulate/:vehicleId/status`                      | Informa se há simulação ativa (`{ "running": true }`)                                                                      |
 
 Na simulação, a posição do veículo é atualizada no banco a cada `tickMs` milissegundos (padrão: 1000). A duração simulada é a duração real da rota dividida por `speedMultiplier` (padrão: 6).
 
