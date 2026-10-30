@@ -7,6 +7,7 @@ import {
 } from "#utils/schemas.js";
 
 import {
+  index,
   show,
   create,
   update,
@@ -17,6 +18,8 @@ import {
 } from "./attendants.service.js";
 
 export default async function attendantsRoutes(app) {
+  app.get("/", { schema: { tags: ["Atendentes"] } }, () => index());
+
   app.get(
     "/:id",
     { schema: { tags: ["Atendentes"], params: uuidIdSchema } },
