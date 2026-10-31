@@ -100,6 +100,14 @@ Com os containers rodando, em outro terminal:
 docker compose exec api npx prisma migrate deploy
 ```
 
+### 4.5 Instalar o pacote do CORS
+
+No mesmo terminal:
+
+```bash
+docker compose exec api npm install @fastify/cors
+```
+
 ### 5. Acessar
 
 | Serviço | URL |
