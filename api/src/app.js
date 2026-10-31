@@ -22,20 +22,15 @@ export async function buildApp({ logger = true } = {}) {
   const app = Fastify({ logger });
 
   // Registrar o CORS
-  await app.register(cors, {
+  // PATCH precisa estar na lista: o padrão do plugin é só GET, HEAD e POST.
+  await app.register(fastifyCors, {
     origin: "http://localhost:3000",
     credentials: true,
+    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   });
 
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
-
-  // PATCH precisa estar na lista: o padrão do plugin é só GET, HEAD e POST.
-  await app.register(fastifyCors, {
-    origin: CORS_ORIGIN,
-    credentials: true,
-    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  });
 
   setupRealtime(app);
 
