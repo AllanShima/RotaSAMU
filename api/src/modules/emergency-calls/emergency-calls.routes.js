@@ -56,6 +56,7 @@ export default async function emergencyCallsRoutes(app) {
 
 const createBodySchema = EmergencyCallSchema.omit({
   id: true,
+  protocol: true,
   createdAt: true,
 }).extend({
   driverId: z.string().uuid(),

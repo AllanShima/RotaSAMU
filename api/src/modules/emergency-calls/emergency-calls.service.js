@@ -1,6 +1,7 @@
 import { EmergencyCallStatus } from "@prisma/client";
 import { prisma } from "#db/prisma.js";
 import { NotFoundError } from "#utils/errors.js";
+import { nextProtocol } from "./protocol.js";
 
 import {
   notifyCallRegistered,
@@ -38,7 +39,11 @@ export const create = async ({ driverId, ...data }) => {
   if (!vehicle) throw new NotFoundError("Vehicle not found for this driver");
 
   return prisma.$transaction(async (tx) => {
-    const emergencyCall = await tx.emergencyCall.create({ data });
+    // O protocolo é sempre gerado aqui; vem depois de `data` para prevalecer.
+    const protocol = await nextProtocol(tx);
+    const emergencyCall = await tx.emergencyCall.create({
+      data: { ...data, protocol },
+    });
 
     await tx.vehicleEmergencyCall.create({
       data: { vehicleId: vehicle.id, emergencyCallId: emergencyCall.id },

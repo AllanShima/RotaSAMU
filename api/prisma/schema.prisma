@@ -77,6 +77,11 @@ model EmergencyCall {
   createdAt DateTime @default(now())
 }
 
+model ProtocolCounter {
+  date       String @id
+  lastNumber Int
+}
+
 model VehicleEmergencyCall {
   id     String              @id @default(uuid())
   status EmergencyCallStatus @default(NOT_STARTED)

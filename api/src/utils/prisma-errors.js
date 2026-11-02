@@ -38,14 +38,25 @@ export const fromPrismaError = (error) => {
 
 // Private
 
-// O formato do `meta` varia entre o motor clássico (`meta.target`) e os driver
-// adapters do Prisma 7 (`meta.driverAdapterError`). Lemos os dois e, se nenhum
-// trouxer os campos, o chamador usa uma mensagem genérica.
+// Com o adapter-pg (Prisma 7), o Postgres informa o nome do índice e o
+// `constraint` vem como `{ index }`; só cai em `{ fields }` sem o nome.
+// `meta.target` é o formato do motor clássico.
 const uniqueFields = (error) => {
   const target = error.meta?.target;
   if (Array.isArray(target)) return target;
   if (typeof target === "string") return [target];
 
-  const fields = error.meta?.driverAdapterError?.cause?.constraint?.fields;
-  return Array.isArray(fields) ? fields : [];
+  const constraint = error.meta?.driverAdapterError?.cause?.constraint;
+  if (Array.isArray(constraint?.fields)) return constraint.fields;
+  if (constraint?.index) {
+    return [fieldsFromIndex(constraint.index, error.meta?.table)];
+  }
+  return [];
+};
+
+// "EmergencyCall_protocol_key" -> "protocol"
+const fieldsFromIndex = (index, table) => {
+  const name = index.replace(/_key$/, "");
+  const prefix = `${table ?? name.split("_")[0]}_`;
+  return name.startsWith(prefix) ? name.slice(prefix.length) : name;
 };
