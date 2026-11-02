@@ -17,7 +17,7 @@ export default async function routingRoutes(app) {
   app.post(
     "/simulate",
     { schema: { tags: ["Rotas (GPS)"], body: simulateBodySchema } },
-    (request) => startSimulation(request.body),
+    (request) => startSimulation({ ...request.body, logger: request.log }),
   );
 
   app.post(

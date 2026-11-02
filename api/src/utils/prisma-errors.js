@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import {
   ConflictError,
   NotFoundError,
+  ServiceUnavailableError,
   UnprocessableEntityError,
 } from "#utils/errors.js";
 
@@ -10,6 +11,10 @@ import {
 // Devolve null se o erro não for um erro conhecido do Prisma — nesse caso o
 // error handler continua tratando como 500.
 export const fromPrismaError = (error) => {
+  if (error instanceof Prisma.PrismaClientInitializationError) {
+    return new ServiceUnavailableError("Database unavailable");
+  }
+
   if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return null;
 
   switch (error.code) {
@@ -30,6 +35,16 @@ export const fromPrismaError = (error) => {
     // Atualização/exclusão de um registro que não existe
     case "P2025":
       return new NotFoundError("Record not found");
+
+    // Banco indisponível: o cliente pode tentar de novo mais tarde.
+    case "P1001": // não alcança o servidor
+    case "P1002": // timeout ao alcançar o servidor
+    case "P1008": // timeout da operação
+    case "P1017": // o servidor fechou a conexão
+    case "P2024": // pool de conexões esgotado
+    case "P2028": // transação expirou
+    case "P2037": // conexões demais
+      return new ServiceUnavailableError("Database unavailable");
 
     default:
       return null;
