@@ -18,6 +18,9 @@ export const notifyVehicleArrived = (emergencyCallId, plate, client = prisma) =>
 export const notifyCallConcluded = (emergencyCallId, client = prisma) =>
   create(emergencyCallId, "Chamado concluído.", client);
 
+export const notifyCallUpdated = (emergencyCallId, client = prisma) =>
+  create(emergencyCallId, "Dados do chamado atualizados.", client);
+
 // Private
 
 const create = (emergencyCallId, message, client) =>

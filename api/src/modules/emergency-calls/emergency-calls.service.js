@@ -6,6 +6,7 @@ import { nextProtocol } from "./protocol.js";
 import {
   notifyCallRegistered,
   notifyVehicleAssigned,
+  notifyCallUpdated,
   notifyCallConcluded,
 } from "#modules/notifications/notifications.service.js";
 
@@ -62,10 +63,16 @@ export const update = async (id, data) => {
   });
   if (!emergencyCall) throw new NotFoundError("Emergency call not found");
 
-  return prisma.emergencyCall.update({
-    where: { id },
-    data,
-    include: withVehicleStatus,
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.emergencyCall.update({
+      where: { id },
+      data,
+      include: withVehicleStatus,
+    });
+
+    await notifyCallUpdated(id, tx);
+
+    return updated;
   });
 };
 

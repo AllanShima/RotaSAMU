@@ -205,4 +205,32 @@ describe("PATCH /emergency-calls/:id", () => {
 
     expect(response.statusCode).toBe(404);
   });
+
+  it("cria uma notificação ao atualizar", async () => {
+    const call = await createCall();
+
+    await updateCall(call.id, { whatHappened: "Engasgo" });
+
+    const notifications = await ctx.app.inject({
+      method: "GET",
+      url: `/emergency-calls/${call.id}/notifications`,
+    });
+    const messages = notifications.json().map(({ message }) => message);
+
+    expect(messages).toHaveLength(3);
+    expect(messages[0]).toBe("Dados do chamado atualizados.");
+  });
+
+  it("não cria notificação quando a atualização é rejeitada", async () => {
+    const call = await createCall();
+
+    await updateCall(call.id, {});
+
+    const notifications = await ctx.app.inject({
+      method: "GET",
+      url: `/emergency-calls/${call.id}/notifications`,
+    });
+
+    expect(notifications.json()).toHaveLength(2);
+  });
 });
