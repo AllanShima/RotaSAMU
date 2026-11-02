@@ -108,6 +108,14 @@ No mesmo terminal:
 docker compose exec api npm install @fastify/cors
 ```
 
+### 4.8 Instalar o pacote do CORS
+
+No mesmo terminal:
+
+```bash
+docker compose restart api
+```
+
 ### 5. Acessar
 
 | Serviço | URL |
