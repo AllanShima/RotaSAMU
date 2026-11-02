@@ -56,6 +56,19 @@ export const create = async ({ driverId, ...data }) => {
   });
 };
 
+export const update = async (id, data) => {
+  const emergencyCall = await prisma.emergencyCall.findUnique({
+    where: { id },
+  });
+  if (!emergencyCall) throw new NotFoundError("Emergency call not found");
+
+  return prisma.emergencyCall.update({
+    where: { id },
+    data,
+    include: withVehicleStatus,
+  });
+};
+
 export const conclude = async (id) => {
   const emergencyCall = await prisma.emergencyCall.findUnique({
     where: { id },
