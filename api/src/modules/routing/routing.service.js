@@ -60,6 +60,7 @@ export const startSimulation = async ({
   speedMultiplier = DEFAULT_SPEED_MULTIPLIER,
   tickMs = DEFAULT_TICK_MS,
   onArrive,
+  logger = console,
 }) => {
   const vehicle = await prisma.vehicle.findUnique({
     where: { id: vehicleId },
@@ -148,7 +149,10 @@ export const startSimulation = async ({
         onArrive?.();
       }
     } catch (error) {
-      console.error(`Simulation for vehicle ${vehicleId} failed`, error);
+      logger.error(
+        { err: error, vehicleId, emergencyCallId },
+        "vehicle simulation failed",
+      );
       stopSimulation(vehicleId);
     }
   }, tickMs);

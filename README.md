@@ -162,7 +162,9 @@ A documentação completa, com os schemas de entrada, fica em `/docs`. Resumo:
 | `PATCH` | `/emergency-calls/:id/conclude`      | Marca o chamado como `FINISHED`                                         |
 | `GET`   | `/emergency-calls/:id/notifications` | Lista as notificações do chamado, da mais recente para a mais antiga    |
 
-Campos de `POST /emergency-calls`: `protocol`, `address`, `returnLocation`, `whatHappened`, `patientCondition`, `apparentAge` (inteiro ou `null`), `patientCount`, `injuryCondition`, `observations` (texto ou `null`) e `attendantId`.
+Campos de `POST /emergency-calls`: `address`, `returnLocation`, `whatHappened`, `patientCondition`, `apparentAge` (inteiro ou `null`), `patientCount`, `injuryCondition`, `observations` (texto ou `null`), `attendantId` e `driverId`.
+
++O `protocol` é gerado pela API no formato `AAAAMMDD-NNNN` (ex: `20261102-0007`), com a data de Marília e o número reiniciando a cada dia. Ele vem na resposta e não deve ser enviado.
 
 ### Conversas (`/conversations`)
 
@@ -193,7 +195,8 @@ User ──1:1── Vehicle ──< VehicleEmergencyCall >── EmergencyCall 
 
 - **User**: `role` (`DRIVER` ou `ATTENDANT`) e `status` (`ONLINE` ou `OFFLINE`). Os motoristas têm um único veículo.
 - **Vehicle**: placa única e posição (`latitude`, `longitude`).
-- **EmergencyCall**: dados da ocorrência, com protocolo único.
+- **EmergencyCall**: dados da ocorrência, com protocolo único gerado pela API.
+- **ProtocolCounter**: último número de protocolo emitido em cada dia.
 - **VehicleEmergencyCall**: vínculo entre veículo e chamado, com status `NOT_STARTED`, `IN_PROGRESS` ou `FINISHED`.
 - **Conversation** e **Message**: chat entre um atendente e um motorista.
 - **Notification**: avisos associados a um chamado.

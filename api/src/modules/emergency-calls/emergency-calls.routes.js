@@ -6,6 +6,7 @@ import {
   show,
   getLocation,
   create,
+  update,
   conclude,
   indexNotifications,
 } from "./emergency-calls.service.js";
@@ -40,6 +41,18 @@ export default async function emergencyCallsRoutes(app) {
   );
 
   app.patch(
+    "/:id",
+    {
+      schema: {
+        tags: ["Chamados de Emergência"],
+        params: uuidIdSchema,
+        body: updateBodySchema,
+      },
+    },
+    (request) => update(request.params.id, request.body),
+  );
+
+  app.patch(
     "/:id/conclude",
     { schema: { tags: ["Chamados de Emergência"], params: uuidIdSchema } },
     (request) => conclude(request.params.id),
@@ -56,9 +69,22 @@ export default async function emergencyCallsRoutes(app) {
 
 const createBodySchema = EmergencyCallSchema.omit({
   id: true,
+  protocol: true,
   createdAt: true,
 }).extend({
   driverId: z.string().uuid(),
 });
+
+const updateBodySchema = z
+  .object({
+    returnLocation: z.string().trim().min(1),
+    whatHappened: z.string().trim().min(1),
+    injuryCondition: z.string().trim().min(1),
+    observations: z.string().trim().nullable(),
+  })
+  .partial()
+  .refine((body) => Object.keys(body).length > 0, {
+    message: "Informe ao menos um campo para atualizar",
+  });
 
 const getLocationQuerySchema = uuidIdSchema;

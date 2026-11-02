@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import {
   ConflictError,
   NotFoundError,
+  ServiceUnavailableError,
   UnprocessableEntityError,
 } from "#utils/errors.js";
 
@@ -10,6 +11,10 @@ import {
 // Devolve null se o erro não for um erro conhecido do Prisma — nesse caso o
 // error handler continua tratando como 500.
 export const fromPrismaError = (error) => {
+  if (error instanceof Prisma.PrismaClientInitializationError) {
+    return new ServiceUnavailableError("Database unavailable");
+  }
+
   if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return null;
 
   switch (error.code) {
@@ -31,6 +36,16 @@ export const fromPrismaError = (error) => {
     case "P2025":
       return new NotFoundError("Record not found");
 
+    // Banco indisponível: o cliente pode tentar de novo mais tarde.
+    case "P1001": // não alcança o servidor
+    case "P1002": // timeout ao alcançar o servidor
+    case "P1008": // timeout da operação
+    case "P1017": // o servidor fechou a conexão
+    case "P2024": // pool de conexões esgotado
+    case "P2028": // transação expirou
+    case "P2037": // conexões demais
+      return new ServiceUnavailableError("Database unavailable");
+
     default:
       return null;
   }
@@ -38,14 +53,25 @@ export const fromPrismaError = (error) => {
 
 // Private
 
-// O formato do `meta` varia entre o motor clássico (`meta.target`) e os driver
-// adapters do Prisma 7 (`meta.driverAdapterError`). Lemos os dois e, se nenhum
-// trouxer os campos, o chamador usa uma mensagem genérica.
+// Com o adapter-pg (Prisma 7), o Postgres informa o nome do índice e o
+// `constraint` vem como `{ index }`; só cai em `{ fields }` sem o nome.
+// `meta.target` é o formato do motor clássico.
 const uniqueFields = (error) => {
   const target = error.meta?.target;
   if (Array.isArray(target)) return target;
   if (typeof target === "string") return [target];
 
-  const fields = error.meta?.driverAdapterError?.cause?.constraint?.fields;
-  return Array.isArray(fields) ? fields : [];
+  const constraint = error.meta?.driverAdapterError?.cause?.constraint;
+  if (Array.isArray(constraint?.fields)) return constraint.fields;
+  if (constraint?.index) {
+    return [fieldsFromIndex(constraint.index, error.meta?.table)];
+  }
+  return [];
+};
+
+// "EmergencyCall_protocol_key" -> "protocol"
+const fieldsFromIndex = (index, table) => {
+  const name = index.replace(/_key$/, "");
+  const prefix = `${table ?? name.split("_")[0]}_`;
+  return name.startsWith(prefix) ? name.slice(prefix.length) : name;
 };

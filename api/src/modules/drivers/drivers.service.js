@@ -21,11 +21,16 @@ export const index = () =>
   });
 
 export const show = (id) =>
-  prisma.user.findFirst({
-    where: { id, role: UserRole.DRIVER },
-    include: { vehicle: true },
-    omit: OMIT_PASSWORD,
-  });
+  prisma.user
+    .findFirst({
+      where: { id, role: UserRole.DRIVER },
+      include: { vehicle: true },
+      omit: OMIT_PASSWORD,
+    })
+    .then((driver) => {
+      if (!driver) throw new NotFoundError("Driver not found");
+      return driver;
+    });
 
 export const create = async ({ vehicle, ...data }) => {
   const password = await bcrypt.hash(data.password, SALT_ROUNDS);

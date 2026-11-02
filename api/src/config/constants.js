@@ -19,3 +19,7 @@ const parseOrigins = (value = "") => {
 };
 
 export const CORS_ORIGIN = parseOrigins(process.env.CORS_ORIGIN);
+
+// O detalhe do erro só sai na resposta quando NODE_ENV é exatamente
+// "development" (nunca em produção nem em test).
+export const IS_DEVELOPMENT = process.env.NODE_ENV === "development";

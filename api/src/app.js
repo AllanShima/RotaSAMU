@@ -19,7 +19,7 @@ import routingRoutes from "#modules/routing/routing.routes.js";
 import { setupRealtime } from "#modules/routing/realtime.js";
 
 export async function buildApp({ logger = true } = {}) {
-  const app = Fastify({ logger });
+  const app = Fastify({ logger, genReqId: () => randomUUID() });
 
   // Registrar o CORS
   // PATCH precisa estar na lista: o padrão do plugin é só GET, HEAD e POST.
@@ -86,15 +86,30 @@ export async function buildApp({ logger = true } = {}) {
         .send({ message: appError.message });
     }
 
+    // Validação primeiro: é o único caso que devolve `details`.
     if (error.validation) {
       return reply
         .code(400)
         .send({ message: "Validation error", details: error.validation });
     }
 
-    request.log.error(error);
-    return reply.code(500).send({ message: "Internal server error" });
+    // Erros do cliente que o próprio Fastify já classificou
+    // (JSON inválido, Content-Type não suportado, corpo grande demais...).
+    if (error.statusCode >= 400 && error.statusCode < 500) {
+      return reply.code(error.statusCode).send({ message: error.message });
+    }
+
+    request.log.error({ err: error }, "unhandled error");
+    return reply.code(500).send({
+      message: "Internal server error",
+      requestId: request.id,
+      ...(IS_DEVELOPMENT && { detail: error.message }),
+    });
   });
+
+  app.setNotFoundHandler((request, reply) =>
+    reply.code(404).send({ message: "Route not found" }),
+  );
 
   return app;
 }

@@ -1,10 +1,12 @@
 import { EmergencyCallStatus } from "@prisma/client";
 import { prisma } from "#db/prisma.js";
 import { NotFoundError } from "#utils/errors.js";
+import { nextProtocol } from "./protocol.js";
 
 import {
   notifyCallRegistered,
   notifyVehicleAssigned,
+  notifyCallUpdated,
   notifyCallConcluded,
 } from "#modules/notifications/notifications.service.js";
 
@@ -38,7 +40,11 @@ export const create = async ({ driverId, ...data }) => {
   if (!vehicle) throw new NotFoundError("Vehicle not found for this driver");
 
   return prisma.$transaction(async (tx) => {
-    const emergencyCall = await tx.emergencyCall.create({ data });
+    // O protocolo é sempre gerado aqui; vem depois de `data` para prevalecer.
+    const protocol = await nextProtocol(tx);
+    const emergencyCall = await tx.emergencyCall.create({
+      data: { ...data, protocol },
+    });
 
     await tx.vehicleEmergencyCall.create({
       data: { vehicleId: vehicle.id, emergencyCallId: emergencyCall.id },
@@ -48,6 +54,25 @@ export const create = async ({ driverId, ...data }) => {
     await notifyVehicleAssigned(emergencyCall.id, vehicle.plate, tx);
 
     return emergencyCall;
+  });
+};
+
+export const update = async (id, data) => {
+  const emergencyCall = await prisma.emergencyCall.findUnique({
+    where: { id },
+  });
+  if (!emergencyCall) throw new NotFoundError("Emergency call not found");
+
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.emergencyCall.update({
+      where: { id },
+      data,
+      include: withVehicleStatus,
+    });
+
+    await notifyCallUpdated(id, tx);
+
+    return updated;
   });
 };
 

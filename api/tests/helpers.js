@@ -64,7 +64,6 @@ export const emergencyCallPayload = ({
   driverId,
   ...overrides
 }) => ({
-  protocol: `PROTO-${nextNumber()}`,
   address: "Rua das Flores, 100",
   returnLocation: "Hospital Regional",
   whatHappened: "Queda de nível",

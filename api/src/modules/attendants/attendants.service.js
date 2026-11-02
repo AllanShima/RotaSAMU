@@ -18,10 +18,15 @@ export const index = () =>
   });
 
 export const show = (id) =>
-  prisma.user.findFirst({
-    where: { id, role: UserRole.ATTENDANT },
-    omit: OMIT_PASSWORD,
-  });
+  prisma.user
+    .findFirst({
+      where: { id, role: UserRole.ATTENDANT },
+      omit: OMIT_PASSWORD,
+    })
+    .then((attendant) => {
+      if (!attendant) throw new NotFoundError("Attendant not found");
+      return attendant;
+    });
 
 export const create = async (data) => {
   const password = await bcrypt.hash(data.password, SALT_ROUNDS);

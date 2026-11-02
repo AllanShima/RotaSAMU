@@ -124,6 +124,14 @@ describe("usuários", () => {
       expect(response.statusCode).toBe(404);
     });
 
+    it("devolve 404 para um id que não é de atendente", async () => {
+      const driver = await createDriver();
+
+      const response = await get(`/attendants/${driver.id}`);
+
+      expect(response.statusCode).toBe(404);
+    });
+
     it("devolve 400 para um status inválido", async () => {
       const driver = await createDriver();
 
