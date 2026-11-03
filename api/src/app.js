@@ -17,6 +17,7 @@ import emergencyCallsRoutes from "#modules/emergency-calls/emergency-calls.route
 import conversationsRoutes from "#modules/conversations/conversations.routes.js";
 import routingRoutes from "#modules/routing/routing.routes.js";
 import { setupRealtime } from "#modules/routing/realtime.js";
+import { randomUUID } from 'node:crypto';
 
 export async function buildApp({ logger = true } = {}) {
   const app = Fastify({ logger, genReqId: () => randomUUID() });
